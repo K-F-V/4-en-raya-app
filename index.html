@@ -4,13 +4,606 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 en Raya - Juego Multijugador</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #667eea;
+        }
+
+        .logo-circle:nth-child(2) {
+            border-color: #f093fb;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .scores-box {
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .score-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .player1-color {
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        }
+
+        .player2-color {
+            background: linear-gradient(135deg, #fb7185, #e11d48);
+        }
+
+        .score-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .player1-text {
+            color: #7c3aed;
+        }
+
+        .player2-text {
+            color: #e11d48;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .game-info h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .turn-info {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .game-scores {
+            display: flex;
+            gap: 30px;
+        }
+
+        .mini-score {
+            text-align: center;
+        }
+
+        .mini-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .mini-score-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .winner-banner.show {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .winner-banner h3 {
+            font-size: 2rem;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .trophy {
+            font-size: 3rem;
+        }
+
+        .board-container {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 70px);
+            gap: 10px;
+        }
+
+        .cell {
+            width: 70px;
+            height: 70px;
+            background: #1e3a8a;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .cell:hover {
+            background: #1e293b;
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+        }
+
+        .piece {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            animation: drop 0.4s ease-out;
+        }
+
+        @keyframes drop {
+            0% {
+                transform: translateY(-400px);
+            }
+            60% {
+                transform: translateY(10px);
+            }
+            80% {
+                transform: translateY(-5px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .piece.player1 {
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        }
+
+        .piece.player2 {
+            background: linear-gradient(135deg, #fb7185, #e11d48);
+        }
+
+        .piece.winning {
+            animation: pulse 0.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.8), 0 4px 10px rgba(0, 0, 0, 0.3);
+            border: 3px solid #fbbf24;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.1);
+            }
+        }
+
+        .piece.last-move {
+            border: 2px solid white;
+        }
+
+        .preview-piece {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: repeat(7, 50px);
+                gap: 8px;
+            }
+
+            .cell {
+                width: 50px;
+                height: 50px;
+            }
+
+            .piece, .preview-piece {
+                width: 42px;
+                height: 42px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel" src="game.jsx"></script>
+    <div class="container">
+        <!-- Pantalla de inicio -->
+        <div class="start-screen" id="startScreen">
+            <div class="logo">
+                <div class="logo-circle"></div>
+                <div class="logo-circle"></div>
+            </div>
+            
+            <h1>4 en Raya</h1>
+            <p class="subtitle">¡Conecta 4 fichas para ganar!</p>
+
+            <div class="scores-box">
+                <div class="score-row">
+                    <div class="player-info">
+                        <div class="player-circle player1-color"></div>
+                        <span style="font-size: 1.2rem; font-weight: 600; color: #333;">Jugador 1</span>
+                    </div>
+                    <span class="score-number player1-text" id="startScore1">0</span>
+                </div>
+                <div class="score-row">
+                    <div class="player-info">
+                        <div class="player-circle player2-color"></div>
+                        <span style="font-size: 1.2rem; font-weight: 600; color: #333;">Jugador 2</span>
+                    </div>
+                    <span class="score-number player2-text" id="startScore2">0</span>
+                </div>
+            </div>
+
+            <button onclick="startGame()">▶ Comenzar Juego</button>
+        </div>
+
+        <!-- Pantalla de juego -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-header">
+                <div class="game-info">
+                    <h2>4 en Raya</h2>
+                    <p class="turn-info">
+                        Turno: <span id="currentPlayerText" style="font-weight: bold;">Jugador 1</span>
+                    </p>
+                </div>
+                <div class="game-scores">
+                    <div class="mini-score">
+                        <div class="mini-circle player1-color"></div>
+                        <div class="mini-score-number player1-text" id="gameScore1">0</div>
+                    </div>
+                    <div class="mini-score">
+                        <div class="mini-circle player2-color"></div>
+                        <div class="mini-score-number player2-text" id="gameScore2">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="winner-banner" id="winnerBanner">
+                <div class="trophy">🏆</div>
+                <h3 id="winnerText"></h3>
+            </div>
+
+            <div class="board-container">
+                <div class="board" id="board"></div>
+            </div>
+
+            <button onclick="resetGame()">🔄 Nueva Partida</button>
+        </div>
+    </div>
+
+    <script>
+        const ROWS = 6;
+        const COLS = 7;
+        const EMPTY = 0;
+        const PLAYER1 = 1;
+        const PLAYER2 = 2;
+
+        let board = [];
+        let currentPlayer = PLAYER1;
+        let winner = null;
+        let winningCells = [];
+        let scores = { player1: 0, player2: 0 };
+        let lastMove = null;
+
+        function initBoard() {
+            board = Array(ROWS).fill(null).map(() => Array(COLS).fill(EMPTY));
+            currentPlayer = PLAYER1;
+            winner = null;
+            winningCells = [];
+            lastMove = null;
+            renderBoard();
+            updateTurnDisplay();
+            document.getElementById('winnerBanner').classList.remove('show');
+        }
+
+        function loadScores() {
+            const saved = localStorage.getItem('connect4-scores');
+            if (saved) {
+                scores = JSON.parse(saved);
+                updateAllScores();
+            }
+        }
+
+        function saveScores() {
+            localStorage.setItem('connect4-scores', JSON.stringify(scores));
+        }
+
+        function updateAllScores() {
+            document.getElementById('startScore1').textContent = scores.player1;
+            document.getElementById('startScore2').textContent = scores.player2;
+            document.getElementById('gameScore1').textContent = scores.player1;
+            document.getElementById('gameScore2').textContent = scores.player2;
+        }
+
+        function updateTurnDisplay() {
+            const text = document.getElementById('currentPlayerText');
+            text.textContent = `Jugador ${currentPlayer}`;
+            text.style.color = currentPlayer === PLAYER1 ? '#7c3aed' : '#e11d48';
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (winner) cell.classList.add('disabled');
+                    
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    const value = board[row][col];
+                    if (value !== EMPTY) {
+                        const piece = document.createElement('div');
+                        piece.className = `piece player${value}`;
+                        
+                        if (isWinningCell(row, col)) {
+                            piece.classList.add('winning');
+                        }
+                        if (lastMove && lastMove[0] === row && lastMove[1] === col) {
+                            piece.classList.add('last-move');
+                        }
+                        
+                        cell.appendChild(piece);
+                    }
+                    
+                    cell.addEventListener('click', () => handleCellClick(col));
+                    cell.addEventListener('mouseenter', () => handleCellHover(col, true));
+                    cell.addEventListener('mouseleave', () => handleCellHover(col, false));
+                    
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellHover(col, isEnter) {
+            if (winner) return;
+            
+            const cells = document.querySelectorAll(`[data-col="${col}"]`);
+            cells.forEach(cell => {
+                if (isEnter && !cell.querySelector('.piece')) {
+                    const preview = document.createElement('div');
+                    preview.className = `preview-piece player${currentPlayer}-color`;
+                    cell.appendChild(preview);
+                } else {
+                    const preview = cell.querySelector('.preview-piece');
+                    if (preview) preview.remove();
+                }
+            });
+        }
+
+        function handleCellClick(col) {
+            if (winner) return;
+
+            let row = -1;
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (board[r][col] === EMPTY) {
+                    row = r;
+                    break;
+                }
+            }
+
+            if (row === -1) return;
+
+            board[row][col] = currentPlayer;
+            lastMove = [row, col];
+            renderBoard();
+
+            const winCells = checkWinner(row, col, currentPlayer);
+            
+            if (winCells) {
+                winner = currentPlayer;
+                winningCells = winCells;
+                scores[`player${currentPlayer}`]++;
+                saveScores();
+                updateAllScores();
+                showWinner();
+                renderBoard();
+            } else if (board.every(row => row.every(cell => cell !== EMPTY))) {
+                winner = 'draw';
+                showWinner();
+            } else {
+                currentPlayer = currentPlayer === PLAYER1 ? PLAYER2 : PLAYER1;
+                updateTurnDisplay();
+            }
+        }
+
+        function checkWinner(row, col, player) {
+            const directions = [
+                [[0, 1], [0, -1]],
+                [[1, 0], [-1, 0]],
+                [[1, 1], [-1, -1]],
+                [[1, -1], [-1, 1]]
+            ];
+
+            for (let dir of directions) {
+                let cells = [[row, col]];
+                
+                for (let [dr, dc] of dir) {
+                    let r = row + dr;
+                    let c = col + dc;
+                    while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === player) {
+                        cells.push([r, c]);
+                        r += dr;
+                        c += dc;
+                    }
+                }
+                
+                if (cells.length >= 4) {
+                    return cells;
+                }
+            }
+            return null;
+        }
+
+        function isWinningCell(row, col) {
+            return winningCells.some(([r, c]) => r === row && c === col);
+        }
+
+        function showWinner() {
+            const banner = document.getElementById('winnerBanner');
+            const text = document.getElementById('winnerText');
+            
+            if (winner === 'draw') {
+                text.textContent = '¡Empate!';
+            } else {
+                text.textContent = `¡Jugador ${winner} ganó!`;
+            }
+            
+            banner.classList.add('show');
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.add('active');
+            initBoard();
+        }
+
+        function resetGame() {
+            initBoard();
+        }
+
+        // Inicializar
+        loadScores();
+    </script>
 </body>
 </html>
